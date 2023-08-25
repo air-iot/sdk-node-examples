@@ -4,10 +4,12 @@ const mqtt = require('mqtt')
 const vm = require('vm')
 const cfg = require('./config')
 const {App, Driver} = require('@airiot/sdk-nodejs/driver')
+let ApiClient = require("@airiot/sdk-nodejs/api")
 
 class MQTTDriverDemo extends Driver {
   init() {
     console.log('init')
+    this.apiClient = new ApiClient(cfg.api)
   }
 
   schema(app, cb) {
@@ -20,6 +22,13 @@ class MQTTDriverDemo extends Driver {
 
   start = (app, config, cb) => {
     console.log('启动', config)
+    this.apiClient.queryTableSchema(cfg.project, {})
+      .then(res => {
+        console.log('查询表', res)
+      }).catch(err => {
+      console.error('查询表错误', err)
+    })
+
     this.app = app
     this.clear()
     let err = this.parseData(config)

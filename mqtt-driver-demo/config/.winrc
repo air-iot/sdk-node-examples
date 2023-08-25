@@ -4,13 +4,13 @@
   "mq": {
     "type": "mqtt",
     "mqtt": {
-      "host": "airiot.link",
-      "port": 55883
+      "host": "127.0.0.1",
+      "port": 1883
     }
   },
   "driver_grpc": {
-    "host": "airiot.link",
-    "port": 55224
+    "host": "127.0.0.1",
+    "port": 9224
   },
   "logger": {
     "level": "debug"
