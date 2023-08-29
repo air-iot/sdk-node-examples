@@ -22,13 +22,6 @@ class MQTTDriverDemo extends Driver {
 
   start = (app, config, cb) => {
     console.log('启动', config)
-    this.apiClient.queryTableSchema(cfg.project, {})
-      .then(res => {
-        console.log('查询表', res)
-      }).catch(err => {
-      console.error('查询表错误', err)
-    })
-
     this.app = app
     this.clear()
     let err = this.parseData(config)
@@ -40,6 +33,13 @@ class MQTTDriverDemo extends Driver {
 
   run(app, command, cb) {
     console.log('运行指令', command)
+    this.apiClient.getTableData(cfg.project, command.table, command.id)
+      .then(res => {
+        console.log('查询资产数据', res)
+      }).catch(err => {
+      console.error('查询资产数据错误', err)
+    })
+
     let {topic, payload} = this.cmdHandler(command.table, command.id, command.command)
     this.client.publish(topic, payload, (err, packet) => {
       if (err) {

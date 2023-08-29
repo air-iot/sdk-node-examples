@@ -1,13 +1,13 @@
 {
   "name": "sdk-node-examples",
   "scripts": {
-    "build": "ncc build main.js -o dist -m"
+    "build": "ncc build index.js -o dist -m"
   },
-  "author": "ZhangQiang",
+  "author": "zhangqiang",
   "license": "ISC",
   "bundleDependencies": [],
   "dependencies": {
-    "@airiot/sdk-nodejs": "^4.2.1",
+    "@airiot/sdk-nodejs": "^4.2.6",
     "node-schedule": "^2.1.1"
   },
   "deprecated": false,
@@ -15,5 +15,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.0.0"
+  "version": "0.0.1"
 }

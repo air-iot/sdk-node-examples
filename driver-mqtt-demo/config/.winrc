@@ -1,6 +1,6 @@
 {
   "project": "64d47a3e5d4aafb22c1b550b",
-  "service_id": "nodedemo",
+  "serviceId": "nodedemo",
   "mq": {
     "type": "mqtt",
     "mqtt": {
@@ -8,7 +8,7 @@
       "port": 1883
     }
   },
-  "driver_grpc": {
+  "driverGrpc": {
     "host": "127.0.0.1",
     "port": 9224
   },

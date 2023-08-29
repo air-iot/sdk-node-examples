@@ -1,0 +1,10 @@
+{
+  "flow-engine": {
+    "host": "127.0.0.1",
+    "port": 2333
+  },
+  "flow": {
+    "name": "flowTestNode",
+    "mode": "service"
+  }
+}

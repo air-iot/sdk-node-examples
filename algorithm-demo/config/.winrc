@@ -1,0 +1,10 @@
+{
+  "algorithm-grpc": {
+    "host": "127.0.0.1",
+    "port": 9236
+  },
+  "algorithm": {
+    "id": "test",
+    "name": "测试算法"
+  }
+}
