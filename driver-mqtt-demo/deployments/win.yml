@@ -1,0 +1,6 @@
+Name: driver-mqtt-demo
+Description: 测试程序
+Version: 4.0.0
+ConfigType: config.json
+GroupName: driver
+Command: node index.js --config config.json
