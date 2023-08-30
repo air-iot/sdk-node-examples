@@ -9,7 +9,7 @@ let ApiClient = require("@airiot/sdk-nodejs/api")
 class MQTTDriverDemo extends Driver {
   init() {
     console.log('init')
-    this.apiClient = new ApiClient(cfg.api)
+    // this.apiClient = new ApiClient(cfg.api)
   }
 
   schema(app, cb) {
@@ -21,7 +21,7 @@ class MQTTDriverDemo extends Driver {
   }
 
   start = (app, config, cb) => {
-    console.log('启动', config)
+    console.log('启动', JSON.stringify(config))
     this.app = app
     this.clear()
     let err = this.parseData(config)
@@ -33,12 +33,12 @@ class MQTTDriverDemo extends Driver {
 
   run(app, command, cb) {
     console.log('运行指令', command)
-    this.apiClient.getTableData(cfg.project, command.table, command.id)
-      .then(res => {
-        console.log('查询资产数据', res)
-      }).catch(err => {
-      console.error('查询资产数据错误', err)
-    })
+    // this.apiClient.getTableData(cfg.project, command.table, command.id)
+    //   .then(res => {
+    //     console.log('查询资产数据', res)
+    //   }).catch(err => {
+    //   console.error('查询资产数据错误', err)
+    // })
 
     let {topic, payload} = this.cmdHandler(command.table, command.id, command.command)
     this.client.publish(topic, payload, (err, packet) => {
@@ -103,11 +103,25 @@ class MQTTDriverDemo extends Driver {
     }
     this.client = mqtt.connect(device.settings.server, ops)
     const parseScript = {handler: undefined}
-    new vm.Script(device.settings.parseScript).runInNewContext(parseScript)
-    if (device.settings.parseScript) {
-      const commandScript = {handler: undefined}
-      new vm.Script(device.settings.commandScript).runInNewContext(commandScript)
-      this.cmdHandler = commandScript.handler
+    if (device.settings && device.settings.parseScript) {
+      try {
+        let s = new vm.Script(device.settings.parseScript)
+        s.runInNewContext(parseScript)
+      } catch (e) {
+        console.error('解析脚本错误,', e)
+        return e
+      }
+    }
+    if (device.settings && device.settings.commandScript) {
+      try {
+        const commandScript = {handler: undefined}
+        let s = new vm.Script(device.settings.commandScript)
+        s.runInNewContext(commandScript)
+        this.cmdHandler = commandScript.handler
+      } catch (e) {
+        console.error('指令脚本错误,', e)
+        return e
+      }
     }
     config.tables.forEach(ts => {
       this.tables[ts.id] = {}
@@ -136,6 +150,10 @@ class MQTTDriverDemo extends Driver {
     this.client.on('message', (topic, message) => {
       console.log('onmessage topic', topic)
       console.log('onmessage message', message)
+      if (!parseScript.handler) {
+        console.error('解析脚本为空')
+        return
+      }
       let arr = parseScript.handler(topic, message)
       if (arr) {
         arr.forEach(ele => {

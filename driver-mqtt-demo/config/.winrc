@@ -16,7 +16,7 @@
     "level": "debug"
   },
   "driver": {
-    "id": "node-demo",
+    "id": "node-driver-mqtt-demo",
     "name": "Node驱动例子"
   }
 }
