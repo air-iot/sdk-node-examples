@@ -1,0 +1,10 @@
+{
+  "flow-engine": {
+    "host": "127.0.0.1",
+    "port": 2333
+  },
+  "extension": {
+     "id": "testNodeFlowExt",
+     "name": "测试node扩展"
+  }
+}
