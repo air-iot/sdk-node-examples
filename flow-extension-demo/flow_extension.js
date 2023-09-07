@@ -1,7 +1,7 @@
 const cfg = require('./config')
 const {App, Extension} = require('@airiot/sdk-nodejs/flow_extension')
 const fs = require("fs");
-
+const schema = require('./schema')
 class TestFlow extends Extension {
 
   init() {
@@ -9,11 +9,12 @@ class TestFlow extends Extension {
   }
 
   schema(app, cb) {
-    let loc = __dirname + '/schema.js'
-    console.log('schema', loc)
-    fs.readFile(loc, 'utf8', function (err, data) {
-      cb(err, data)
-    })
+    // let loc = __dirname + '/schema.js'
+    // console.log('schema', loc)
+    // fs.readFile(loc, 'utf8', function (err, data) {
+    //   cb(err, data)
+    // })
+    cb(null,JSON.stringify(schema))
   }
 
   run(app, req, cb) {
