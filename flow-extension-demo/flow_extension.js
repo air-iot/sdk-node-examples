@@ -1,6 +1,7 @@
 const cfg = require('./config')
 const {App, Extension} = require('@airiot/sdk-nodejs/flow_extension')
-const fs = require("fs");
+const log = require('@airiot/sdk-nodejs/log')
+// const fs = require("fs");
 const schema = require('./schema')
 class TestFlow extends Extension {
 
@@ -18,13 +19,13 @@ class TestFlow extends Extension {
   }
 
   run(app, req, cb) {
-    console.log('执行请求', req)
+    log.debug('执行请求,%o', req)
     let {num1, num2} = req
     cb(null, {"num1": num1 + num2})
   }
 
   stop(app, cb) {
-    app.log.debug('流程停止处理')
+    log.debug('流程停止处理')
     cb(null)
   }
 }
