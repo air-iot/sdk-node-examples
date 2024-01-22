@@ -2,7 +2,7 @@ const cfg = require('./config')
 const {App, Algorithm} = require('@airiot/sdk-nodejs/algorithm')
 const fs = require("fs");
 const log = require('@airiot/sdk-nodejs/log')
-const schema = require('./schema')
+const schema1 = require('./schema')
 
 class TestAlgorithm extends Algorithm {
   schema(app, meta, cb) {
@@ -10,7 +10,7 @@ class TestAlgorithm extends Algorithm {
     // fs.readFile(__dirname + '/schema.js', 'utf8', function (err, data) {
     //   cb(err, data)
     // })
-    cb(null,JSON.stringify(schema))
+    cb(null,JSON.stringify(schema1))
   }
 
   run(app, meta, req, cb) {

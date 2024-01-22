@@ -1,4 +1,4 @@
-({
+module.exports = {
   "driver": {
     "properties": {
       "settings": {
@@ -199,4 +199,4 @@
       }
     }
   }
-})
+}

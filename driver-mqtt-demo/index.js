@@ -1,23 +1,25 @@
-let schedule = require('node-schedule')
-const fs = require('fs');
+// let schedule = require('node-schedule')
+// const fs = require('fs');
 const mqtt = require('mqtt')
 const vm = require('vm')
 const cfg = require('./config')
 const {App, Driver} = require('@airiot/sdk-nodejs/driver')
 let ApiClient = require("@airiot/sdk-nodejs/api")
 const log = require('@airiot/sdk-nodejs/log')
+const schema1 = require('./schema')
 
 class MQTTDriverDemo extends Driver {
-  schema(app, cb) {
-    let loc = __dirname + '/schema.js'
-    log.getLogger(meta).debug('schema: loc=%s', loc)
-    fs.readFile(loc, 'utf8', function (err, data) {
-      cb(err, data)
-    })
+  schema(app, meta, cb) {
+    log.getLogger(meta).debug('schema')
+    // let loc = __dirname + '/schema.js'
+    // fs.readFile(loc, 'utf8', function (err, data) {
+    //   cb(err, data)
+    // })
+    cb(null, JSON.stringify(schema1))
   }
 
   start(app, meta, config, cb) {
-    log.getLogger(meta).debug('解析: 配置=%o', config)
+    log.getLogger(meta).debug('解析: 配置=%j', config)
     this.app = app
     this.clear()
     let err = this.parseData(meta, config)
@@ -200,7 +202,7 @@ class MQTTDriverDemo extends Driver {
       log.getLogger(meta).debug("MQTT Server: log消息=%j", msg)
     })
     this.client.on('close', (reason) => {
-      log.getLogger(meta).detail(err).error(`MQTT Server: 已断开,reason=%o`, reason)
+      log.getLogger(meta).error(`MQTT Server: 已断开,reason=%o`, reason)
     })
     return null
   }
