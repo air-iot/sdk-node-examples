@@ -1,21 +1,20 @@
 const cfg = require('./config')
 const {App, Algorithm} = require('@airiot/sdk-nodejs/algorithm')
 const fs = require("fs");
+const log = require('@airiot/sdk-nodejs/log')
+const schema = require('./schema')
 
 class TestAlgorithm extends Algorithm {
-
-  init() {
-    console.log('init')
+  schema(app, meta, cb) {
+    log.getLogger(meta).debug('schema')
+    // fs.readFile(__dirname + '/schema.js', 'utf8', function (err, data) {
+    //   cb(err, data)
+    // })
+    cb(null,JSON.stringify(schema))
   }
 
-  schema(app, cb) {
-    fs.readFile(__dirname + '/schema.js', 'utf8', function (err, data) {
-      cb(err, data)
-    })
-  }
-
-  run(app, req, cb) {
-    console.log('执行请求', req)
+  run(app, meta, req, cb) {
+    log.getLogger(meta).debug('执行请求: %o', req)
     let input = req['input']
     switch (req['function']) {
       case 'add':
@@ -27,8 +26,8 @@ class TestAlgorithm extends Algorithm {
     }
   }
 
-  stop(app, cb) {
-    app.log.debug('算法停止处理')
+  stop(app, meta, cb) {
+    log.getLogger(meta).debug('算法停止处理')
     cb(null)
   }
 }

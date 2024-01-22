@@ -1,4 +1,4 @@
-[
+module.exports = [
   {
     "title": "node函数1-加法",
     "function": "add",

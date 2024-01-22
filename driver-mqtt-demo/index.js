@@ -5,81 +5,83 @@ const vm = require('vm')
 const cfg = require('./config')
 const {App, Driver} = require('@airiot/sdk-nodejs/driver')
 let ApiClient = require("@airiot/sdk-nodejs/api")
+const log = require('@airiot/sdk-nodejs/log')
 
 class MQTTDriverDemo extends Driver {
-  init() {
-    console.log('init')
-    // this.apiClient = new ApiClient(cfg.api)
-  }
-
   schema(app, cb) {
     let loc = __dirname + '/schema.js'
-    console.log('schema', loc)
+    log.getLogger(meta).debug('schema: loc=%s', loc)
     fs.readFile(loc, 'utf8', function (err, data) {
       cb(err, data)
     })
   }
 
-  start = (app, config, cb) => {
-    console.log('启动', JSON.stringify(config))
+  start(app, meta, config, cb) {
+    log.getLogger(meta).debug('解析: 配置=%o', config)
     this.app = app
     this.clear()
-    let err = this.parseData(config)
+    let err = this.parseData(meta, config)
     if (err) {
       return cb(err)
     }
     cb()
   }
 
-  run(app, command, cb) {
-    console.log('运行指令', command)
+  run(app, meta, command, cb) {
+    log.getLogger(meta).debug('执行指令: 指令=%j', command)
     // this.apiClient.getTableData(cfg.project, command.table, command.id)
     //   .then(res => {
-    //     console.log('查询资产数据', res)
+    //     console.log('查询设备数据', res)
     //   }).catch(err => {
-    //   console.error('查询资产数据错误', err)
+    //   console.error('查询设备数据错误', err)
     // })
 
     let {topic, payload} = this.cmdHandler(command.table, command.id, command.command)
     this.client.publish(topic, payload, (err, packet) => {
       if (err) {
-        console.error('发送指令错误', err)
+        log.getLogger(meta).detail(err).error('发送指令数据错误')
         return cb(err)
       }
       return cb(null, packet)
     })
   }
 
-  batchRun(app, command, cb) {
-    console.log('批量运行指令', command)
+  batchRun(app, meta, command, cb) {
+    log.getLogger(meta).debug('批量执行指令: 指令=%j', command)
     cb(null)
   }
 
-  writeTag(app, command, cb) {
-    console.log('写数据点', command)
+  writeTag(app, meta, command, cb) {
+    log.getLogger(meta).debug('写数据点: 数据点=%j', command)
     cb(null)
   }
 
-  debug(app, debugConfig, cb) {
-    app.log.debug('运行测试', debugConfig)
+  debug(app, meta, debugConfig, cb) {
+    log.getLogger(meta).debug('运行测试: 调试参数=%j', debugConfig)
     cb(null, debugConfig)
   }
 
-  httpProxy(app, type, header, data, cb) {
-    let req = JSON.parse(Buffer.from(data).toString())
-    console.log('httpProxy', type, header, req)
-    if (cb) {
-      cb(null, req)
+  httpProxy(app, meta, type, header, data, cb) {
+    try {
+      let req = JSON.parse(Buffer.from(data).toString())
+      log.getLogger(meta).debug('httpProxy: type=%s,header=%j,req=%j', type, header, req)
+      if (cb) {
+        cb(null, req)
+      }
+    } catch (e) {
+      if (cb) {
+        cb(e)
+      }
     }
   }
 
-  stop(app, cb) {
-    app.log.debug('驱动停止处理')
+  stop(app, meta, cb) {
+    log.getLogger(meta).debug('驱动停止处理')
     this.clear()
     cb(null)
   }
 
-  parseData(config) {
+  parseData(meta, config) {
     if (!config.tables || config.tables.length === 0) {
       return new Error('表为空')
     }
@@ -108,7 +110,7 @@ class MQTTDriverDemo extends Driver {
         let s = new vm.Script(device.settings.parseScript)
         s.runInNewContext(parseScript)
       } catch (e) {
-        console.error('解析脚本错误,', e)
+        log.getLogger(meta).detail(e).error('解析脚本错误')
         return e
       }
     }
@@ -119,7 +121,7 @@ class MQTTDriverDemo extends Driver {
         s.runInNewContext(commandScript)
         this.cmdHandler = commandScript.handler
       } catch (e) {
-        console.error('指令脚本错误,', e)
+        log.getLogger(meta).detail(e).error('指令脚本错误')
         return e
       }
     }
@@ -144,14 +146,14 @@ class MQTTDriverDemo extends Driver {
       }
     })
     this.client.on('connect', () => {
-      console.log('MQTT Server 已经连接', JSON.stringify(device.settings))
+      log.getLogger(meta).debug("MQTT Server: 配置=%j. 已经连接", device.settings)
       this.client.subscribe(device.settings.topic)
     })
     this.client.on('message', (topic, message) => {
-      console.log('onmessage topic', topic)
-      console.log('onmessage message', message)
+      log.getLogger(meta).debug('onmessage: topic=%s', topic)
+      log.getLogger(meta).debug('onmessage: message=%o', message)
       if (!parseScript.handler) {
-        console.error('解析脚本为空')
+        log.getLogger(meta).error('解析脚本为空')
         return
       }
       let arr = parseScript.handler(topic, message)
@@ -159,51 +161,46 @@ class MQTTDriverDemo extends Driver {
         arr.forEach(ele => {
           let tableObj = this.tables[ele.table]
           if (!tableObj) {
-            console.log(`未找到表 ${ele.table} 配置`)
+            log.getLogger(meta).table(ele.table).error(`解析数据: 表=%s. 未找到表配置`, ele.table)
             return
           }
           let devObj = tableObj[ele.id]
           if (!devObj) {
-            console.log(`未找到表 ${ele.table} 资产 ${ele.id} 配置`)
+            log.getLogger(meta).table(ele.table).tableData(ele.id).error(`解析数据: 表=%s,设备=%s. 未找到设备配置`, ele.table, ele.id)
             return
           }
           if (!ele.fields) {
-            console.log(`表 ${ele.table} 资产 ${ele.id} 数据为空`)
+            log.getLogger(meta).table(ele.table).tableData(ele.id).error(`解析数据: 表=%s,设备=%s. 数据为空`, ele.table, ele.id)
             return
           }
           let tags = []
           for (const key in ele.fields) {
             let kt = devObj[key]
             if (!kt) {
-              console.log(`表 ${ele.table} 资产 ${ele.id} 数据 ${key} 未找到`)
+              log.getLogger(meta).table(ele.table).tableData(ele.id).error(`解析数据: 表=%s,设备=%s,数据点=%s. 配置中未找到当前设备数据点配置`, ele.table, ele.id, key)
               continue
             }
             tags.push({tag: kt, value: ele.fields[key]})
           }
           if (tags.length === 0) {
-            console.log(`表 ${ele.table} 资产 ${ele.id} 数据为空`)
             return
           }
           const p = {table: ele.table, id: ele.id, fields: tags, time: ele.time}
-          console.log('测试数据', p)
           this.app.writePoints(p)
             .catch(err => {
-              console.error(`保存数据错误,`, err)
+              log.getLogger(meta).table(ele.table).tableData(ele.id).detail(err).error(`解析数据: 表=%s,设备=%s. 保存数据错误`, ele.table, ele.id)
             })
         })
       }
     })
     this.client.on('error', err => {
-      console.error(`MQTT Server 错误:`, err)
+      log.getLogger(meta).detail(err).error("MQTT Server: 连接错误")
     })
     this.client.on('log', msg => {
-      console.log('MQTT Server log', msg)
+      log.getLogger(meta).debug("MQTT Server: log消息=%j", msg)
     })
     this.client.on('close', (reason) => {
-      console.warn(`MQTT Server 已断开`)
-      if (reason) {
-        console.warn(reason.message)
-      }
+      log.getLogger(meta).detail(err).error(`MQTT Server: 已断开,reason=%o`, reason)
     })
     return null
   }

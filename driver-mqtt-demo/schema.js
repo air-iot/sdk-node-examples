@@ -43,7 +43,7 @@
               "function handler(topic, message) {\n" +
               "\t\n" +
               "\t// 脚本返回值必须为对象数组\n" +
-              "\t// \tid: 资产编号\n" +
+              "\t// \tid: 设备编号\n" +
               "\t//\ttime: 时间戳(毫秒)\n" +
               "\t//  fields: 数据点数据. 该字段为 JSON 对象, key 为数据点标识, value 为数据点的值\n" +
               "\treturn [\n" +
@@ -60,7 +60,7 @@
               " * 指令处理脚本. 发送指令时会将指令内容传递给脚本, 然后由指定返回最终要发送的信息.\n" +
               " *\n" +
               " * @param {string} 工作表标识\n" +
-              " * @param {string} 资产编号\n" +
+              " * @param {string} 设备编号\n" +
               " * @param {object} 命令内容\n" +
               " * @return {object} 最终要发送的消息, 及目标 topic\n" +
               " */\n" +
@@ -181,7 +181,7 @@
           "customDeviceId": {
             "type": "string",
             "title": "设备编号",
-            "descripption": "自定义设备编号. 如果未定义则使用平台中的资产编号"
+            "descripption": "自定义设备编号. 如果未定义则使用平台中的设备编号"
           },
           "network": {
             "type": "object",
