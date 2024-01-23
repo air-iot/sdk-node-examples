@@ -7,7 +7,7 @@
   "license": "ISC",
   "bundleDependencies": [],
   "dependencies": {
-    "@airiot/sdk-nodejs": "^4.4.6",
+    "@airiot/sdk-nodejs": "^4.4.7",
     "node-schedule": "^2.1.1"
   },
   "deprecated": false,
