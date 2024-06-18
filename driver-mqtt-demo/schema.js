@@ -1,4 +1,5 @@
 module.exports = {
+  "key":"node-driver-mqtt-demo",
   "driver": {
     "properties": {
       "settings": {
@@ -7,12 +8,11 @@ module.exports = {
         "properties": {
           "server": {
             "type": "string",
-            "title": "服务器",
-            "descripption": "MQTT 服务器地址. 例如: tcp://127.0.0.1:1883"
+            "title": "服务器"
           },
           "username": {
             "type": "string",
-            "title": "用户名",
+            "title": "用户名"
           },
           "password": {
             "type": "string",
@@ -26,7 +26,7 @@ module.exports = {
           "topic": {
             "type": "string",
             "title": "主题",
-            "descripption": "接收数据的主题. 例如: /data/#"
+            "description": "接收数据的主题. 例如: /data/#"
           },
           "parseScript": {
             "type": "string",
@@ -88,6 +88,81 @@ module.exports = {
           }
         },
         "required": ["server", "username", "password", "topic", "parseScript", "commandScript"]
+      },
+      "tags": {
+        "title": "数据点",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "标识",
+              "description": "数据点的标识, 用于在数据点列表中唯一标识数据点"
+            },
+            "name": {
+              "type": "string",
+              "title": "名称",
+              "description": "数据点的名称"
+            }
+          },
+          "required": ["id", "name"]
+        }
+      },
+      "commands": {
+        "title": "命令",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "名称"
+            },
+            "commandDelay": {
+              "type": "object",
+              "title": "延时配置",
+              "properties": {
+                "enable": {
+                  "type": "boolean",
+                  "title": "启用"
+                },
+                "timeout": {
+                  "type": "number",
+                  "title": "超时"
+                }
+              },
+              "required": []
+            },
+            "ops": {
+              "type": "array",
+              "title": "指令",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "topic": {
+                    "type": "string",
+                    "title": "主题",
+                    "description": "发送消息的主题. 例如: /cmd/control",
+                  },
+                  "message": {
+                    "type": "string",
+                    "title": "消息",
+                    "description": "发送的消息. 例如: {\"cmd\":\"start\"}",
+                  },
+                  "qos": {
+                    "type": "number",
+                    "title": "QoS",
+                    "description": "消息质量. 0,1,2",
+                    "enum": [0, 1, 2],
+                    "enum_title": ["QoS0", "QoS1", "QoS2"]
+                  },
+                },
+                "required": ["name", "message"]
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -139,6 +214,21 @@ module.exports = {
             "name": {
               "type": "string",
               "title": "名称"
+            },
+            "commandDelay": {
+              "type": "object",
+              "title": "延时配置",
+              "properties": {
+                "enable": {
+                  "type": "boolean",
+                  "title": "启用"
+                },
+                "timeout": {
+                  "type": "number",
+                  "title": "超时"
+                }
+              },
+              "required": []
             },
             "ops": {
               "type": "array",

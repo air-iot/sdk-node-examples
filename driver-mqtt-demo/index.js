@@ -6,6 +6,7 @@ const cfg = require('./config')
 const {App, Driver} = require('@airiot/sdk-nodejs/driver')
 let ApiClient = require("@airiot/sdk-nodejs/api")
 const log = require('@airiot/sdk-nodejs/log')
+const commandStatus = require('@airiot/sdk-nodejs/driver/command')
 const schema1 = require('./schema')
 
 class MQTTDriverDemo extends Driver {
@@ -15,7 +16,8 @@ class MQTTDriverDemo extends Driver {
     // fs.readFile(loc, 'utf8', function (err, data) {
     //   cb(err, data)
     // })
-    cb(null, JSON.stringify(schema1))
+    let s = JSON.stringify(schema1)
+    cb(null, "(" + s + ")")
   }
 
   start(app, meta, config, cb) {
@@ -24,7 +26,7 @@ class MQTTDriverDemo extends Driver {
     this.clear()
     let err = this.parseData(meta, config)
     if (err) {
-      return cb(err)
+      // return cb(err)
     }
     cb()
   }
@@ -42,10 +44,13 @@ class MQTTDriverDemo extends Driver {
     this.client.publish(topic, payload, (err, packet) => {
       if (err) {
         log.getLogger(meta).detail(err).error('发送指令数据错误')
-        return cb(err)
+        // return cb(err)
+        return
       }
-      return cb(null, packet)
+      log.getLogger(meta).debug('发送指令数据: %o', packet)
+      // return cb(null, packet)
     })
+    return cb(null)
   }
 
   batchRun(app, meta, command, cb) {
@@ -64,6 +69,15 @@ class MQTTDriverDemo extends Driver {
   }
 
   httpProxy(app, meta, type, header, data, cb) {
+    app.getCommands(meta, "nodesdk", "nodesdk1")
+      .then((commands) => {
+        console.log("commands====", commands)
+        for (let command of commands) {
+          app.updateCommand(meta, command.id, {status: commandStatus.COMMAND_STATUS_SUCCESS})
+            .catch(err => console.error("updateCommand err==============", err))
+        }
+      }).catch(err => console.error("commands err==============", err))
+
     try {
       let req = JSON.parse(Buffer.from(data).toString())
       log.getLogger(meta).debug('httpProxy: type=%s,header=%j,req=%j', type, header, req)
