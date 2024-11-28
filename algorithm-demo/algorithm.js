@@ -5,12 +5,12 @@ const log = require('@airiot/sdk-nodejs/log')
 const schema1 = require('./schema')
 
 class TestAlgorithm extends Algorithm {
-  schema(app, meta, cb) {
+  schema(app, meta, lang, cb) {
     log.getLogger(meta).debug('schema')
     // fs.readFile(__dirname + '/schema.js', 'utf8', function (err, data) {
     //   cb(err, data)
     // })
-    cb(null,JSON.stringify(schema1))
+    cb(null, JSON.stringify(schema1))
   }
 
   run(app, meta, req, cb) {

@@ -4,7 +4,7 @@ const schema = require('./schema')
 const log = require('@airiot/sdk-nodejs/log')
 class TestFlow extends Extension {
 
-  schema(app, meta, cb) {
+  schema(app, meta, lang, cb) {
     log.getLogger(meta).debug('schema')
     cb(null,JSON.stringify(schema))
   }

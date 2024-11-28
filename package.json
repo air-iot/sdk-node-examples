@@ -6,7 +6,7 @@
   "author": "zhangqiang",
   "license": "ISC",
   "dependencies": {
-    "@airiot/sdk-nodejs": "^4.4.20",
+    "@airiot/sdk-nodejs": "^4.4.29",
     "mqtt": "^5.7.0",
     "node-schedule": "^2.1.1",
     "rc": "^1.2.8"

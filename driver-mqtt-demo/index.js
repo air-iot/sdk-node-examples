@@ -10,7 +10,7 @@ const commandStatus = require('@airiot/sdk-nodejs/driver/command')
 const schema1 = require('./schema')
 
 class MQTTDriverDemo extends Driver {
-  schema(app, meta, cb) {
+  schema(app, meta, lang, cb) {
     log.getLogger(meta).debug('schema')
     // let loc = __dirname + '/schema.js'
     // fs.readFile(loc, 'utf8', function (err, data) {
@@ -172,41 +172,45 @@ class MQTTDriverDemo extends Driver {
         log.getLogger(meta).error('解析脚本为空')
         return
       }
-      let arr = parseScript.handler(topic, message)
-      if (arr) {
-        arr.forEach(ele => {
-          let tableObj = this.tables[ele.table]
-          if (!tableObj) {
-            log.getLogger(meta).table(ele.table).error(`解析数据: 表=%s. 未找到表配置`, ele.table)
-            return
-          }
-          let devObj = tableObj[ele.id]
-          if (!devObj) {
-            log.getLogger(meta).table(ele.table).tableData(ele.id).error(`解析数据: 表=%s,设备=%s. 未找到设备配置`, ele.table, ele.id)
-            return
-          }
-          if (!ele.fields) {
-            log.getLogger(meta).table(ele.table).tableData(ele.id).error(`解析数据: 表=%s,设备=%s. 数据为空`, ele.table, ele.id)
-            return
-          }
-          let tags = []
-          for (const key in ele.fields) {
-            let kt = devObj[key]
-            if (!kt) {
-              log.getLogger(meta).table(ele.table).tableData(ele.id).error(`解析数据: 表=%s,设备=%s,数据点=%s. 配置中未找到当前设备数据点配置`, ele.table, ele.id, key)
-              continue
+      try {
+        let arr = parseScript.handler(topic, message)
+        if (arr) {
+          arr.forEach(ele => {
+            let tableObj = this.tables[ele.table]
+            if (!tableObj) {
+              log.getLogger(meta).table(ele.table).error(`解析数据: 表=%s. 未找到表配置`, ele.table)
+              return
             }
-            tags.push({tag: kt, value: ele.fields[key]})
-          }
-          if (tags.length === 0) {
-            return
-          }
-          const p = {table: ele.table, id: ele.id, fields: tags, time: ele.time}
-          this.app.writePoints(p)
-            .catch(err => {
-              log.getLogger(meta).table(ele.table).tableData(ele.id).detail(err).error(`解析数据: 表=%s,设备=%s. 保存数据错误`, ele.table, ele.id)
-            })
-        })
+            let devObj = tableObj[ele.id]
+            if (!devObj) {
+              log.getLogger(meta).table(ele.table).tableData(ele.id).error(`解析数据: 表=%s,设备=%s. 未找到设备配置`, ele.table, ele.id)
+              return
+            }
+            if (!ele.fields) {
+              log.getLogger(meta).table(ele.table).tableData(ele.id).error(`解析数据: 表=%s,设备=%s. 数据为空`, ele.table, ele.id)
+              return
+            }
+            let tags = []
+            for (const key in ele.fields) {
+              let kt = devObj[key]
+              if (!kt) {
+                log.getLogger(meta).table(ele.table).tableData(ele.id).error(`解析数据: 表=%s,设备=%s,数据点=%s. 配置中未找到当前设备数据点配置`, ele.table, ele.id, key)
+                continue
+              }
+              tags.push({tag: kt, value: ele.fields[key]})
+            }
+            if (tags.length === 0) {
+              return
+            }
+            const p = {table: ele.table, id: ele.id, fields: tags, time: ele.time}
+            this.app.writePoints(meta, p)
+              .catch(err => {
+                log.getLogger(meta).table(ele.table).tableData(ele.id).detail(err).error(`解析数据: 表=%s,设备=%s. 保存数据错误`, ele.table, ele.id)
+              })
+          })
+        }
+      } catch (e) {
+        log.getLogger(meta).error('onmessage err: message=%o', e)
       }
     })
     this.client.on('error', err => {
@@ -228,6 +232,8 @@ class MQTTDriverDemo extends Driver {
     }
   }
 }
+
+console.log("配置信息", JSON.stringify(cfg))
 
 // 实例化并开始运行
 new App(cfg).start(new MQTTDriverDemo())
