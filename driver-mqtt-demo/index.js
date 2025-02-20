@@ -91,6 +91,11 @@ class MQTTDriverDemo extends Driver {
     }
   }
 
+  configUpdate(app, meta, updateData, cb) {
+    log.getLogger(meta).debug('configUpdate: updateData=%j', updateData)
+    cb(null)
+  }
+
   stop(app, meta, cb) {
     log.getLogger(meta).debug('驱动停止处理')
     this.clear()
